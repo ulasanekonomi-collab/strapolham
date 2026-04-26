@@ -15,17 +15,22 @@ st.markdown("### Decision Support System: Analisis Kedalaman Konflik & Visi")
 st.sidebar.header("Konfigurasi & Simulasi")
 uploaded_file = st.sidebar.file_uploader("Upload Data Aktor (Excel/CSV)", type=['xlsx', 'csv'])
 
-# --- UPDATE PADA BAGIAN LOAD DATA ---
+# --- UPDATE BAGIAN LOAD DATA (DUA SHEET) ---
 if uploaded_file is not None:
     if uploaded_file.name.endswith('.xlsx'):
-        # Kita paksa sistem membaca Sheet ke-2 (index 1) untuk datanya
         try:
+            # Sistem mencoba membaca Sheet ke-2 (index 1) yang bernama 'data'
             df = pd.read_excel(uploaded_file, sheet_name=1) 
         except:
-            # Jika file hanya punya 1 sheet, tetap baca sheet pertama
-            df = pd.read_excel(uploaded_file)
+            # Jika Sheet 2 tidak ada atau error, baca sheet pertama (index 0)
+            df = pd.read_excel(uploaded_file, sheet_name=0)
     else:
+        # Jika file yang diupload adalah CSV
         df = pd.read_csv(uploaded_file)
+    
+    # Pastikan kolom Tipe_Visi ada, kalau tidak ada kita kasih default 1
+    if 'Tipe_Visi' not in df.columns:
+        df['Tipe_Visi'] = 1
 else:
     df = pd.read_excel(uploaded_file) if uploaded_file.name.endswith('.xlsx') else pd.read_csv(uploaded_file)
     if 'Tipe_Visi' not in df.columns:
