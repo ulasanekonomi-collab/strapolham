@@ -26,6 +26,18 @@ if uploaded_file is None:
         'History_Friction': [0, 0, 1, 0, 0]
     }
     df = pd.DataFrame(data)
+    st.sidebar.divider()
+st.sidebar.subheader("🕹️ Simulation Tool")
+st.sidebar.write("Geser untuk simulasi hasil lobi politik:")
+
+# Kita buat slider untuk aktor yang paling resisten (misal HMI)
+# Secara otomatis mencari aktor dengan posisi paling negatif
+lawan_terberat = df.sort_values('Posisi_Isu').iloc[0]['Nama']
+sim_posisi = st.sidebar.slider(f"Ubah Posisi {lawan_terberat}", -2, 2, int(df[df['Nama']==lawan_terberat]['Posisi_Isu'].values[0]))
+
+# Update dataframe sementara untuk simulasi
+df_sim = df.copy()
+df_sim.loc[df_sim['Nama'] == lawan_terberat, 'Posisi_Isu'] = sim_posisi
 else:
     if uploaded_file.name.endswith('.xlsx'):
         df = pd.read_excel(uploaded_file)
