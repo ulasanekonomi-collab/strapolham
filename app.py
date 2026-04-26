@@ -5,8 +5,8 @@ import plotly.express as px
 # --- KONFIGURASI HALAMAN ---
 st.set_page_config(page_title="STRAPOLHAM Analytics", layout="wide", page_icon="🌱")
 
-st.title("🌱 STRAPOLHAM Digital System")
-st.markdown("### Decision Support System untuk Harmonisasi Kebijakan")
+st.title("🌱 STRAPOLHAM Digital System (v1.1)")
+st.markdown("### Decision Support System: Analisis Kedalaman Konflik & Visi")
 
 # --- SIDEBAR INPUT & SIMULASI ---
 st.sidebar.header("Konfigurasi & Simulasi")
@@ -20,11 +20,14 @@ if uploaded_file is None:
         'Power': [3, 2, 4, 4, 4, 4],
         'Posisi_Isu': [1, -1, -2, 1, 1, 2],
         'Visi': ['Merdeka', 'Program', 'Islam', 'Islam', 'Kemanusiaan', 'Unggul'],
+        'Tipe_Visi': [1, 2, 3, 1, 1, 1], # 1: Sinergis, 2: Oportunis, 3: Kontra
         'History_Friction': [1, 0, 1, 1, 1, 1]
     }
     df = pd.DataFrame(data)
 else:
     df = pd.read_excel(uploaded_file) if uploaded_file.name.endswith('.xlsx') else pd.read_csv(uploaded_file)
+    if 'Tipe_Visi' not in df.columns:
+        df['Tipe_Visi'] = 1 # Default jika kolom belum ada di Excel
 
 # 2. Fitur Simulasi Slider
 st.sidebar.divider()
@@ -33,26 +36,34 @@ actor_to_sim = st.sidebar.selectbox("Pilih Aktor untuk Lobi:", df['Nama'].tolist
 current_pos = int(df[df['Nama'] == actor_to_sim]['Posisi_Isu'].values[0])
 new_pos = st.sidebar.slider(f"Geser Posisi {actor_to_sim}", -2, 2, current_pos)
 
+# Mapping Bobot Visi: Tipe 3 (Kontra) memperberat dampak posisi
+vision_weights = {1: 1.0, 2: 1.2, 3: 1.8}
+
 # Create Simulated Data
 df_sim = df.copy()
 df_sim.loc[df_sim['Nama'] == actor_to_sim, 'Posisi_Isu'] = new_pos
 
-# --- CALCULATION ENGINE ---
+# --- CALCULATION ENGINE (WITH VISION WEIGHT) ---
 def get_metrics(data_df):
-    phi = (data_df['Power'] * data_df['Posisi_Isu']).sum() / (data_df['Power'].sum() * 2)
+    # Rumus PHI Terbobot Visi
+    weighted_sum = sum(data_df['Power'] * data_df['Posisi_Isu'] * data_df['Tipe_Visi'].map(vision_weights))
+    max_possible = sum(data_df['Power'] * 2 * 1.8) # Normalisasi dengan bobot tertinggi
+    phi = weighted_sum / max_possible
     return phi
 
 phi_ori = get_metrics(df)
 phi_sim = get_metrics(df_sim)
-status_keb = "KRITIS/RENTAN" if phi_sim < 0.3 else "STABIL/KONDUSIF"
+status_keb = "KRITIS/RENTAN" if phi_sim < 0.25 else "STABIL/KONDUSIF"
 
 # --- DISPLAY UTAMA ---
 col1, col2 = st.columns([2, 1])
 
 with col1:
     st.subheader("📊 Strategic Mapping (Simulasi)")
-    fig = px.scatter(df_sim, x="Posisi_Isu", y="Power", size="Power", color="Nama",
-                     hover_name="Visi", text="Nama", range_x=[-2.5, 2.5], range_y=[0, 6])
+    # Tambahkan kategori Tipe Visi di warna atau simbol
+    fig = px.scatter(df_sim, x="Posisi_Isu", y="Power", size="Power", color="Tipe_Visi",
+                     hover_name="Visi", text="Nama", range_x=[-2.5, 2.5], range_y=[0, 6],
+                     color_continuous_scale="RdYlGn_r", title="Peta Kekuatan & Kedalaman Visi")
     fig.add_vline(x=0, line_dash="dash", line_color="red")
     st.plotly_chart(fig, use_container_width=True)
 
@@ -60,44 +71,41 @@ with col2:
     st.subheader("🔬 Metrics & Diagnosa")
     st.metric("Potential Harmony Index (PHI)", f"{phi_sim:.2f}", delta=f"{phi_sim - phi_ori:.2f}")
     
-    if phi_sim < 0.3:
-        st.error(f"Status: {status_keb}")
-    else:
-        st.success(f"Status: {status_keb}")
+    # Indikator Kedalaman Konflik
+    conflict_depth = df_sim[df_sim['Tipe_Visi'] == 3]['Power'].sum()
+    st.write(f"**Indeks Kedalaman Konflik:** {conflict_depth}")
+    st.progress(min(conflict_depth / 15, 1.0))
+    st.caption("Semakin tinggi bar, semakin berat benturan ideologi (Visi Kontra).")
 
 # --- INTERPRETASI RAPI ---
 st.divider()
-st.subheader("📝 Interpretasi Strategis")
+st.subheader("📝 Interpretasi Strategis (Weighted Analysis)")
 int_col1, int_col2 = st.columns(2)
 
 with int_col1:
-    st.markdown("**1. Status Harmonisasi**")
-    st.write(f"Kebijakan ini berada pada level **{status_keb}**. Energi konvergensi kepentingan memerlukan orkestrasi tambahan.")
+    st.markdown("**1. Status Harmonisasi (Weighted)**")
+    st.write(f"Kebijakan ini berada pada level **{status_keb}**. Bobot visi menunjukkan adanya {'resistensi prinsipil' if conflict_depth > 3 else 'ruang negosiasi'} yang kuat.")
     
-    st.markdown("**2. Variabel Kunci**")
-    st.info(f"Aktor **{actor_to_sim}** diidentifikasi sebagai variabel kunci. Pergeseran posisinya berdampak signifikan pada stabilitas harmoni.")
+    st.markdown("**2. Analisis Lobi**")
+    st.info(f"Lobi terhadap **{actor_to_sim}** memberikan dampak {'signifikan' if abs(phi_sim - phi_ori) > 0.05 else 'moderat'}. Strategi harus menyesuaikan dengan Tipe Visi aktor tersebut.")
 
 with int_col2:
-    st.markdown("**3. Residu Konflik (Bab 4)**")
-    total_friction = df_sim['History_Friction'].sum()
-    if total_friction > 0:
-        st.warning(f"Terdeteksi residu konflik pada {total_friction} aktor. Gunakan 'Bridging Actor'!")
+    st.markdown("**3. Residu Konflik & Visi (Bab 4 & 5)**")
+    if (df_sim['Tipe_Visi'] == 3).any():
+        st.warning("⚠️ Terdeteksi benturan Visi Ideologis (Tipe 3). Pendekatan transaksional mungkin akan gagal; gunakan pendekatan nilai.")
     else:
-        st.success("Hambatan historis minimal.")
-
-    st.markdown("**4. Rekomendasi Eksekusi**")
-    st.write("👉 Fokus pada 'Interest Reframing' dan lobi informal sebelum implementasi teknis dilakukan.")
+        st.success("✅ Visi antar aktor relatif konvergen.")
 
 # --- FITUR NARASI LAPORAN ---
 st.divider()
 if st.button("📄 Buat Narasi Laporan Strategis"):
-    narasi_final = f"""BERDASARKAN ANALISIS STRATEGI POLITIK HARMONIS (STRAPOLHAM):
+    narasi_final = f"""BERDASARKAN ANALISIS STRATEGI POLITIK HARMONIS (STRAPOLHAM) VERSI 1.1:
 
-Kondisi harmonisasi kebijakan saat ini berada pada tingkat yang {status_keb} dengan skor PHI sebesar {phi_sim:.2f}. Angka ini menunjukkan bahwa ruang konvergensi kepentingan masih memerlukan orkestrasi yang lebih mendalam.
+Kondisi harmonisasi saat ini menunjukkan skor PHI sebesar {phi_sim:.2f} ({status_keb}). Berbeda dengan analisis standar, perhitungan ini telah memasukkan 'Bobot Visi' yang mendeteksi kedalaman benturan prinsip antar aktor.
 
-Strategi prioritas adalah melakukan pendekatan intensif kepada {actor_to_sim} guna menggeser posisinya ke arah yang lebih kooperatif. Simulasi menunjukkan kenaikan harmoni sebesar {phi_sim - phi_ori:+.2f}.
+Ditemukan bahwa hambatan utama bukan sekadar posisi menolak, melainkan adanya ketidaksesuaian visi ideologis (Conflict Depth: {conflict_depth}). Hal ini terlihat pada aktor ber-Tipe Visi 3 yang memerlukan penanganan khusus di luar lobi teknis.
 
-Disarankan melibatkan mediator independen untuk mengatasi 'History Friction' yang terdeteksi, guna memastikan keberlanjutan kebijakan di masa depan."""
+Rekomendasi: Lakukan pendekatan 'Value Alignment' kepada {actor_to_sim}. Jika aktor ini memiliki visi yang berseberangan secara prinsip, maka narasi kebijakan harus di-reframing agar masuk ke dalam koridor visi mereka tanpa mengorbankan tujuan utama kebijakan."""
 
-    st.subheader("📝 Draft Laporan (Copy-Paste)")
+    st.subheader("📝 Draft Laporan")
     st.text_area("Hasil Narasi:", narasi_final, height=300)
