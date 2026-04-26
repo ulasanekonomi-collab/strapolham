@@ -5,15 +5,10 @@ import plotly.express as px
 # --- KONFIGURASI HALAMAN ---
 st.set_page_config(page_title="STRAPOLHAM Analytics", layout="wide", page_icon="🌱")
 
-st.title("🌱 STRAPOLHAM Digital System (v1.1)")
-# --- KONFIGURASI HALAMAN ---
-st.set_page_config(page_title="STRAPOLHAM Analytics", layout="wide", page_icon="🌱")
-
-# --- JUDUL & HEADER ---
+# --- JUDUL & IDENTITAS PENGEMBANG ---
 st.title("🌱 STRAPOLHAM Digital System (v1.1)")
 st.markdown("##### **Dikembangkan oleh Yuhka Sundaya - Ekonomi Pembangunan Unisba**")
-st.markdown("---") # Ini akan membuat garis pembatas tipis
-st.markdown("### Decision Support System: Analisis Kedalaman Konflik & Visi")
+st.markdown("---") 
 st.markdown("### Decision Support System: Analisis Kedalaman Konflik & Visi")
 
 # --- SIDEBAR INPUT & SIMULASI ---
