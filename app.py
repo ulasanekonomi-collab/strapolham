@@ -74,6 +74,24 @@ with col2:
     for h in hasil:
         with st.expander(f"🚩 {h['judul']} ({h['model']})"):
             st.write(f"**Eksekusi Praktik:** {h['aksi']}")
+# --- TAMBAHKAN KODE INI DI BAGIAN BAWAH app.py ---
 
+st.subheader("📝 Interpretasi Strategis (Gaya Deduktif)")
+
+# Logika kalkulasi untuk interpretasi
+if phi < 0.3:
+    status_kebijakan = "KRITIS/RENTAN"
+    saran_utama = "Segera lakukan 'Interest Reframing' dan mediasi informal."
+else:
+    status_kebijakan = "STABIL/KONDUSIF"
+    saran_utama = "Lanjutkan ke fase implementasi teknis."
+
+# Menampilkan poin penting
+st.markdown(f"""
+1. **Status Harmonisasi Kebijakan:** Kondisi saat ini berada pada level **{status_kebijakan}** dengan skor PHI **{phi:.2f}**. Hal ini menunjukkan bahwa energi pertentangan masih cukup kuat untuk menghambat stabilitas kebijakan.
+2. **Kekuatan Oposisi Dominan:** Keberadaan aktor dengan *Power* tinggi di zona negatif (seperti HMI) menjadi faktor penentu rendahnya PHI. Tanpa akomodasi kepentingan terhadap aktor ini, kebijakan berisiko mengalami *deadlock*.
+3. **Residu Konflik Historis:** Tingginya angka *History Friction* pada hampir seluruh aktor kunci menandakan bahwa komunikasi rasional terhambat oleh memori organisasi masa lalu.
+4. **Rekomendasi Eksekusi:** {saran_utama} Gunakan *Bridging Actor* untuk memutus kebuntuan antara Rektorat dan faksi mahasiswa yang menolak.
+""")
 st.divider()
 st.caption("STRAPOLHAM v1.0 - Digital Transformation of Academic Research")
