@@ -106,4 +106,9 @@ st.markdown(f"""
 4. **Rekomendasi Eksekusi:** {saran_utama} Gunakan *Bridging Actor* untuk memutus kebuntuan antara Rektorat dan faksi mahasiswa yang menolak.
 """)
 st.divider()
+# Hitung PHI Baru
+phi_baru = (df_sim['Power'] * df_sim['Posisi_Isu']).sum() / (df_sim['Power'].sum() * 2)
+
+# Tampilkan Perbandingan PHI
+st.sidebar.metric("PHI Hasil Simulasi", f"{phi_baru:.2f}", delta=f"{phi_baru - phi:.2f}")
 st.caption("STRAPOLHAM v1.0 - Digital Transformation of Academic Research")
