@@ -15,18 +15,17 @@ st.markdown("### Decision Support System: Analisis Kedalaman Konflik & Visi")
 st.sidebar.header("Konfigurasi & Simulasi")
 uploaded_file = st.sidebar.file_uploader("Upload Data Aktor (Excel/CSV)", type=['xlsx', 'csv'])
 
-# 1. Load Data
-if uploaded_file is None:
-    st.sidebar.warning("Gunakan data simulasi...")
-    data = {
-        'Nama': ['BEMU', 'BEMF', 'HMI', 'KAMMI', 'MTB', 'REKTORAT'],
-        'Power': [3, 2, 4, 4, 4, 4],
-        'Posisi_Isu': [1, -1, -2, 1, 1, 2],
-        'Visi': ['Merdeka', 'Program', 'Islam', 'Islam', 'Kemanusiaan', 'Unggul'],
-        'Tipe_Visi': [1, 2, 3, 1, 1, 1], # 1: Sinergis, 2: Oportunis, 3: Kontra
-        'History_Friction': [1, 0, 1, 1, 1, 1]
-    }
-    df = pd.DataFrame(data)
+# --- UPDATE PADA BAGIAN LOAD DATA ---
+if uploaded_file is not None:
+    if uploaded_file.name.endswith('.xlsx'):
+        # Kita paksa sistem membaca Sheet ke-2 (index 1) untuk datanya
+        try:
+            df = pd.read_excel(uploaded_file, sheet_name=1) 
+        except:
+            # Jika file hanya punya 1 sheet, tetap baca sheet pertama
+            df = pd.read_excel(uploaded_file)
+    else:
+        df = pd.read_csv(uploaded_file)
 else:
     df = pd.read_excel(uploaded_file) if uploaded_file.name.endswith('.xlsx') else pd.read_csv(uploaded_file)
     if 'Tipe_Visi' not in df.columns:
