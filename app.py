@@ -15,20 +15,32 @@ st.markdown("### Decision Support System: Analisis Kedalaman Konflik & Visi")
 st.sidebar.header("Konfigurasi & Simulasi")
 uploaded_file = st.sidebar.file_uploader("Upload Data Aktor (Excel/CSV)", type=['xlsx', 'csv'])
 
-# --- UPDATE BAGIAN LOAD DATA (DUA SHEET) ---
-if uploaded_file is not None:
+# --- LOGIKA LOAD DATA ANTI-ERROR ---
+if uploaded_file is None:
+    # Jika belum upload, sediakan data dummy agar sistem tidak error
+    data = {
+        'Nama': ['Contoh Aktor 1', 'Contoh Aktor 2'],
+        'Power': [3, 4],
+        'Posisi_Isu': [1, -1],
+        'Visi': ['Visi A', 'Visi B'],
+        'Tipe_Visi': [1, 3],
+        'History_Friction': [0, 1]
+    }
+    df = pd.DataFrame(data)
+    st.info("💡 Silakan upload file Excel Akang di sidebar untuk memulai analisis.")
+else:
+    # Proses file yang diupload
     if uploaded_file.name.endswith('.xlsx'):
         try:
-            # Sistem mencoba membaca Sheet ke-2 (index 1) yang bernama 'data'
-            df = pd.read_excel(uploaded_file, sheet_name=1) 
+            # Membaca Sheet ke-2 (index 1) dengan nama 'data'
+            df = pd.read_excel(uploaded_file, sheet_name=1)
         except:
-            # Jika Sheet 2 tidak ada atau error, baca sheet pertama (index 0)
+            # Fallback jika hanya ada 1 sheet
             df = pd.read_excel(uploaded_file, sheet_name=0)
     else:
-        # Jika file yang diupload adalah CSV
         df = pd.read_csv(uploaded_file)
-    
-    # Pastikan kolom Tipe_Visi ada, kalau tidak ada kita kasih default 1
+
+    # Pastikan kolom Tipe_Visi ada agar tidak error di perhitungan
     if 'Tipe_Visi' not in df.columns:
         df['Tipe_Visi'] = 1
 else:
