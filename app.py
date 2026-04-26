@@ -6,7 +6,7 @@ import plotly.express as px
 st.set_page_config(page_title="STRAPOLHAM Analytics", layout="wide", page_icon="🌱")
 
 # --- JUDUL & IDENTITAS PENGEMBANG ---
-st.title("🌱 STRAPOLHAM Digital System (v1.1)")
+st.title("🌱 STRAPOLHAM")
 st.markdown("##### **Dikembangkan oleh Yuhka Sundaya - Ekonomi Pembangunan Unisba**")
 st.markdown("---") 
 st.markdown("### Analisis Kedalaman Konflik & Visi")
